@@ -195,16 +195,21 @@
                                     <!-- Add more options as needed -->
                                 </ul>
                             </div>
-                            
+                            <div class="btn-group me-2">
+                              <button class="btn btn-sm btn-secondary fs-14" id="startTodayButton">
+                                  Start Today
+                              </button>
+                          </div>
+
                             <div class="btn-group me-2">
                                 <button class="btn btn-sm btn-secondary" id="dueTodayButton" aria-expanded="false">
                                     Due Today
                                 </button>
                             </div>
                             
-                            <div class="btn-group me-2">
-                                <button class="btn btn-sm btn-secondary fs-14" id="startTodayButton">
-                                    Start Today
+                             <div class="btn-group me-2">
+                                <button class="btn btn-sm btn-secondary" id="ongoingButton" aria-expanded="false">
+                                    Ongoing
                                 </button>
                             </div>
 
@@ -311,6 +316,10 @@
                     $("#startTodayButton").click(function() {
                         toggleFilteringByDate(2); // Index of the start date column
                     });
+
+                    $("#ongoingButton").click(function(){
+                        filterOngoingTasks();
+                    })
             
                     // Clear filtering when "Clear" button is clicked
                     $("#clearButton").click(function() {
@@ -329,6 +338,21 @@
                             $(this).hide();
                         }
                     });
+                }
+
+                function filterOngoingTasks(){
+                  var today = new Date();
+                  $(".table tbody tr").each(function() {
+                      var startDateString = $(this).find("td:eq(2)").text().trim();
+                      var dueDateString = $(this).find("td:eq(3)").text().trim();
+                      var startDate = new Date(startDateString);
+                      var dueDate = new Date(dueDateString);
+                      if (startDate <= today && dueDate >= today) {
+                          $(this).show();
+                      } else {
+                          $(this).hide();
+                      }
+                  });
                 }
             </script>
             <!-- Footer -->

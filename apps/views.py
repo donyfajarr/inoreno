@@ -12,6 +12,8 @@ from django.db.models import Q
 import json
 from django.http import JsonResponse
 import requests
+import urllib.parse
+from urllib.parse import unquote
 
 @login
 def index(request):
@@ -525,19 +527,58 @@ def listissue(request,id):
     })
 
 def listdetails(request, id):
-    get = models.task.objects.get(id=id)
-    getproject = get.id_project
-    getpic = models.pic.objects.filter(id_task = id)
-    
-    listpic = []
-    for item in getpic:
-        listpic.append(item.pic)
-    listpic = ','.join(listpic)
-    return render(request, 'listdetails.html', {
+    if request.method == 'GET':
+        get = models.task.objects.get(id=id)
+        getproject = get.id_project
+        getpic = models.pic.objects.filter(id_task = id)
+        
+        listpic = []
+        for item in getpic:
+            listpic.append(item.pic)
+        listpic = ','.join(listpic)
+        email = request.GET.get('email', '')
+        if email:
+            email = unquote(email)
+        return render(request, 'listdetails.html', {
         "get" : get,
         "getproject" : getproject,
-        'getpic' : listpic
+        'getpic' : listpic,
+        'email' : email,
+        'id' : id
     })
+    else:
+        sender = request.POST['sender']
+        description = request.POST['description']
+        get = models.task.objects.get(id=id)
+        receipent = get.assignee.email
+        fullname = get.assignee.first_name + " " + get.assignee.last_name
+        email_api = "http://10.24.7.70:3333/send-email"
+        subject = f"#{get.id}-{get.subject} Task Feedback"
+        body = f"""
+                Dear {fullname},
+
+                This is my feedback about my #{get.id}-{get.subject} task:
+                {description}
+                
+                Regards,
+                {sender}
+                """
+        payload = {
+            "to": [receipent],
+            "cc": [],
+            "subject": subject,
+            "body": body
+        }
+        print(payload)
+    #    response = requests.post(email_api, json=payload)
+    #     if response.status_code == 200:
+    #         print("Email sent successfully.")
+    #     else:
+    #         print(f"Failed to send email. Status code: {response.status_code}")
+    #         print(response.text)
+        return redirect ('listdetails', id=id)
+        #  
+    
 
 @login
 def newissue(request):
@@ -641,7 +682,7 @@ def send_email(request):
         def find_pic(task):
             return list(models.pic.objects.filter(id_task=task))
 
-        def create_email_body(task, status):
+        def create_email_body(task, status, recipient_email):
             general_name = "Team Member"
             fullname = task.assignee.first_name + " " + task.assignee.last_name
             author_name = fullname            
@@ -651,6 +692,7 @@ def send_email(request):
             due_date = task.due_date
             task_id = task.id
 
+            encoded_email = urllib.parse.quote(recipient_email)
             if status == 'start':
                 body = f"""
                 Dear {general_name},
@@ -658,7 +700,7 @@ def send_email(request):
                 You have a task that started today and will be due on {due_date} from the {project_name} project
                 with the task subject: {subject}.
 
-                View more at: http://10.24.7.165/listdetails/{task_id}
+                View more at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
 
                 Regards,
                 {author_name}
@@ -670,7 +712,7 @@ def send_email(request):
                 You still have a running task that started on {start_date} and will be due on {due_date}
                 from the {project_name} project with the task subject: {subject}.
 
-                View more at: http://10.24.7.165/listdetails/{task_id}
+                View more at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
 
                 Regards,
                 {author_name}
@@ -682,7 +724,7 @@ def send_email(request):
                 You have a task that will be due today ({due_date}) from the {project_name} project
                 with the task subject: {subject}.
 
-                View more at: http://10.24.7.165/listdetails/{task_id}
+                View more at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
 
                 Regards,
                 {author_name}
@@ -698,30 +740,30 @@ def send_email(request):
                 "body": body
             }
             print(payload)
-            response = requests.post(email_api, json=payload)
-            if response.status_code == 200:
-                print("Email sent successfully.")
-            else:
-                print(f"Failed to send email. Status code: {response.status_code}")
-                print(response.text)
+        #     response = requests.post(email_api, json=payload)
+        #     if response.status_code == 200:
+        #         print("Email sent successfully.")
+        #     else:
+        #         print(f"Failed to send email. Status code: {response.status_code}")
+        #         print(response.text)
 
-        # Process tasks and send emails
+        # # Process tasks and send emails
         for task in start_today_tasks:
             pics = find_pic(task)
             for pic in pics:
-                body = create_email_body(task, 'start')
+                body = create_email_body(task, 'start', pic.pic)
                 send_email(pic.pic, task.assignee.email, f"#{task.id} [{task.subject}] Task Reminder", body)
         
         for task in end_today_tasks:
             pics = find_pic(task)
             for pic in pics:
-                body = create_email_body(task, 'end')
+                body = create_email_body(task, 'end', pic.pic)
                 send_email(pic.pic, task.assignee.email, f"#{task.id} [{task.subject}] Task Reminder", body)
         
         for task in ongoing_tasks:
             pics = find_pic(task)
             for pic in pics:
-                body = create_email_body(task, 'ongoing')
+                body = create_email_body(task, 'ongoing', pic.pic)
                 send_email(pic.pic, task.assignee.email, f"#{task.id} [{task.subject}] Task Reminder", body)
         
         return redirect('index')
