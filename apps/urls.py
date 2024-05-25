@@ -20,4 +20,6 @@ urlpatterns = [
     path('get_project_data', views.get_project_data, name='get_project_data'),
     path('addissue', views.addissue, name='addissue'),
     path('send_email', views.send_email, name='send_email'),
+    path('register', views.register, name='register'),
+    path('export/csv/<int:id>/', views.export_csv, name='export_csv'),
 ]

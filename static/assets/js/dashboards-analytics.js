@@ -34,7 +34,7 @@
           endingShape: 'rounded'
         }
       },
-      colors: [config.colors.primary, config.colors.secondary, config.colors.info],
+      colors: [config.colors.success, config.colors.primary],
       dataLabels: {
         enabled: false
       },
@@ -289,7 +289,7 @@
       },
       labels: data.labels,
       series: data.series,
-      colors: [config.colors.primary, config.colors.secondary, config.colors.warning, ],
+      colors: [config.colors.primary, config.colors.success, config.colors.warning, ],
       stroke: {
         width: 5,
         colors: cardColor

@@ -271,7 +271,7 @@
                         </button>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="orederStatistics">
                   
-                          <a class="dropdown-item" href="javascript:void(0);">Refresh</a>
+                          <a class="dropdown-item" href="{% url 'index' %}">Refresh</a>
                         </div>
                       </div>
                     </div>
@@ -287,7 +287,7 @@
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
                             <span class="avatar-initial rounded bg-label-primary"
-                              ><i class="bx bx-mobile-alt"></i
+                              ><i class="bx bx-comment-dots"></i
                             ></span>
                           </div>
                           <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
@@ -301,7 +301,7 @@
                         </li>
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-success"><i class="bx bx-closet"></i></span>
+                            <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-detail"></i></span>
                           </div>
                           <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                             <div class="me-2">
@@ -314,7 +314,7 @@
                         </li>
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
-                            <span class="avatar-initial rounded bg-label-info"><i class="bx bx-home-alt"></i></span>
+                            <span class="avatar-initial rounded bg-label-success"><i class="bx bx-file"></i></span>
                           </div>
                           <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                             <div class="me-2">
@@ -344,8 +344,8 @@
                         {% for item in rawunder %}
                         <li class="d-flex mb-4 pb-1">
                           <div class="avatar flex-shrink-0 me-3">
-                            <a href="{% url 'listdetails' item.id %}"><span class="avatar-initial rounded bg-label-primary"
-                              ><i class="bx bx-task"></i
+                            <a href="{% url 'listdetails' item.id %}"><span class="avatar-initial rounded bg-label-warning"
+                              ><i class="bx bx-search"></i
                             ></span></a>
                           </div>
                           <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
@@ -400,7 +400,7 @@
                         <div class="d-flex px-xxl-4 px-lg-2 p-4 gap-xxl-3 gap-lg-1 gap-3 justify-content-between">
                           <div class="d-flex">
                             <div class="me-2">
-                              <span class="badge bg-label-primary p-2"><i class="bx bx-dollar text-primary"></i></span>
+                              <span class="badge bg-label-primary p-2"><i class="bx bx-comment-dots text-primary"></i></span>
                             </div>
                             <div class="d-flex flex-column">
                               <small>Open</small>
@@ -409,7 +409,7 @@
                           </div>
                           <div class="d-flex">
                             <div class="me-2">
-                              <span class="badge bg-label-info p-2"><i class="bx bx-wallet text-info"></i></span>
+                              <span class="badge bg-label-warning p-2"><i class="bx bx-detail"></i></span>
                             </div>
                             <div class="d-flex flex-column">
                               <small>Reviewed</small>
@@ -490,7 +490,7 @@
                         endingShape: 'rounded'
                       }
                     },
-                    colors: [config.colors.primary, config.colors.info],
+                    colors: [config.colors.success, config.colors.primary],
                     dataLabels: {
                       enabled: false
                     },

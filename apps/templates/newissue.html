@@ -181,11 +181,11 @@
                   <h4 class="fw-bold py-3 mb-4">Issue List</h4>
                 
                 <!-- Basic Bootstrap Table -->
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
+                <div class="card mb-4">
+                    <div class="card-body mb-0">
+                        <div class="d-flex align-items-center mb-4">
                             <div class="btn-group me-2">
-                                <button class="btn  btn-secondary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="btn btn-outline-primary dropdown-toggle" type="button" id="statusDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                     Status
                                 </button>
                                 <ul class="dropdown-menu" aria-labelledby="statusDropdown">
@@ -196,30 +196,32 @@
                                 </ul>
                             </div>
                             <div class="btn-group me-2">
-                              <button class="btn btn-sm btn-secondary fs-14" id="startTodayButton">
+                              <button class="btn btn-outline-primary" id="startTodayButton">
                                   Start Today
                               </button>
-                          </div>
+                            </div>
 
                             <div class="btn-group me-2">
-                                <button class="btn btn-sm btn-secondary" id="dueTodayButton" aria-expanded="false">
+                                <button class="btn btn-outline-primary" id="dueTodayButton">
                                     Due Today
                                 </button>
                             </div>
                             
                              <div class="btn-group me-2">
-                                <button class="btn btn-sm btn-secondary" id="ongoingButton" aria-expanded="false">
+                                <button class="btn btn-outline-primary" id="ongoingButton">
                                     Ongoing
                                 </button>
                             </div>
 
                             <div class="btn-group me-2">
-                                <button class="btn btn-sm btn-secondary" id="clearButton">
+                                <button class="btn btn-outline-secondary" id="clearButton">
                                     Clear
                                 </button>
                             </div>
-
-                                <input type="text" id="filterInput" class="form-control form-control-lg me-2" placeholder="Search...">
+                            <div class="btn-group me-2">
+                              <input type="text" id="filterInput" class="form-control shadow-none" placeholder="Search...">
+                            </div>
+                                
 
                         </div>
                     <div class="table-responsive text-nowrap">
@@ -238,7 +240,17 @@
                             {% for item in allissue %}
                             <tr class="table-default">
                                 <td><a href="{% url 'listdetails' item.id %}" class="text-decoration-none"> <strong>{{item.subject}}</strong></a></td>
-                              <td><span class="badge bg-label-primary">{{item.status}}</span></td>
+                                <td>
+                                {% if item.status.jenis == 'Open' %}
+                                <span class="badge bg-label-primary">{{ item.status }}</span>
+                              {% elif item.status.jenis == 'Under Review' %}
+                                <span class="badge bg-label-warning">{{ item.status }}</span>
+                              {% elif item.status.jenis == 'Closed' %}
+                                <span class="badge bg-label-info">{{ item.status }}</span>
+                              {% else %}
+                                <span class="badge bg-label-secondary">{{ item.status }}</span> <!-- Default case, if needed -->
+                              {% endif %}
+                              </td>
                               <td>{{item.start_date}}</td>
                               <td>{{item.due_date}}</td>
                               <td>{{item.assignee}}</td>
@@ -292,7 +304,7 @@
             
                 function filterTableByStatus(status) {
                     $(".table tbody tr").each(function() {
-                        var rowStatus = $(this).find("td:eq(1)").text();
+                        var rowStatus = $(this).find("td:eq(1) .badge").text();
                         if (rowStatus === status) {
                             $(this).show();
                         } else {

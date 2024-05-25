@@ -523,6 +523,7 @@ def listissue(request,id):
     request.session['idproject'] = id
     return render(request, 'listissue.html', {
         'listissue' : listissue,
+        'id' : id
         
     })
 
@@ -767,3 +768,47 @@ def send_email(request):
                 send_email(pic.pic, task.assignee.email, f"#{task.id} [{task.subject}] Task Reminder", body)
         
         return redirect('index')
+    
+@login
+def register(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['email']
+        create = models.User.objects.create_user(username=username, email=email, password=password, first_name=first_name, last_name=last_name)
+        create.save()
+        return redirect ('register')
+    return render(request, 'register.html',{
+
+    })
+
+import csv
+from django.http import HttpResponse
+def export_csv(request, id):
+    
+    getproject = models.project.objects.get(id=id)
+    get = models.task.objects.filter(id_project = getproject)
+    getpic = models.pic.objects.filter(id_task__in = get)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{getproject.subject}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Task', 'Start Date', 'Due Date', 'PIC', 'Status', 'Priority'])  # Add your actual column headers here
+
+    for task in get:
+        task_pics = getpic.filter(id_task=task)
+        for pic in task_pics:
+            writer.writerow([
+                task.id,
+                task.subject,  # Replace with actual task name field
+                task.start_date,  # Replace with actual start date field
+                task.due_date,  # Replace with actual due date field
+                pic.pic,  # Replace with actual pic name field
+                task.status,  # Replace with actual status field
+                task.id_priority  # Replace with actual priority field
+            ])
+
+    return response

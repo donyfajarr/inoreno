@@ -15,7 +15,7 @@
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
 
-    <title>Project Settings - Greenfields Redmine Manager</title>
+    <title>Create Account - Greenfields Redmine Manager</title>
 
     <meta name="description" content="" />
 
@@ -178,7 +178,7 @@
             <!-- Content -->
 
             <div class="container-xxl flex-grow-1 container-p-y">
-              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Update Settings</h4>
+              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Create Account</h4>
 
               <!-- Basic Layout & Basic with Icons -->
               <div class="row">
@@ -186,80 +186,64 @@
                 <div class="col-xxl">
                   <div class="card mb-4">
                     <div class="card-header d-flex align-items-center justify-content-between">
-                      <h5 class="mb-0">Update Settings</h5>
+                      <h5 class="mb-0">Create Account</h5>
                     </div>
                     <div class="card-body">
                       <form method="post" onsubmit="return validateForm()">
                         {% csrf_token %}
                         <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-default-name">Start Row</label>
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">First Name</label>
                             <div class="col-sm-10">
-                              <input name="start_row" type="number" class="form-control" id="basic-default-name"value="{{dict.start_row}}"/>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-2 col-form-label" for="basic-default-name">Task Start Column</label>
-                          <div class="col-sm-10">
-                            <input name="start_column" type="number" class="form-control" id="basic-default-name"value="{{dict.start_column}}"/>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="exampleFormControlTextarea1">Task End Column</label>
-                            <div class="col-sm-10">
-                                <input name="end_column" type="number" class="form-control" id="basic-default-name" value="{{dict.end_column}}" />
-                              </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-default-name">Gannt Start Column</label>
-                            <div class="col-sm-10">
-                              <input name="gannt_start_column" type="number" class="form-control" id="basic-default-name"value="{{dict.gannt_start_column}}"/>
+                              <input name="first_name" type="text" class="form-control" id="basic-default-name" placeholder="First Name" />
                             </div>
                           </div>
                           <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="basic-default-name">Week Number Row</label>
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Last Name</label>
                             <div class="col-sm-10">
-                              <input name="week_number_row" type="number" class="form-control" id="basic-default-name"value="{{dict.week_number_row}}"/>
+                              <input name="last_name" type="text" class="form-control" id="basic-default-name" placeholder="Last Name" />
                             </div>
                           </div>
+                          
                         <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="exampleFormControlTextarea1">PIC Column</label>
-                            <div class="col-sm-10">
-                                <input name="pic_column" type="number" class="form-control" id="basic-default-name" value="{{dict.pic_column}}"/>
-                              </div>
+                          <label class="col-sm-2 col-form-label" for="basic-default-name">Username</label>
+                          <div class="col-sm-10">
+                            <input name="username" type="text" class="form-control" id="basic-default-name" placeholder="Username" />
+                          </div>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-sm-2 col-form-label" for="defaultSelect">Email Column<a href="https://bettersolutions.com/excel/rows-columns/letters-to-numbers.htm"> (?)</a></label>
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Password</label>
                             <div class="col-sm-10">
-                                <input name="email_column" type="number" class="form-control" id="basic-default-name" value="{{dict.email_column}}"/>
-                              </div>
-                        </div>
-                       
+                              <input name="password" type="password" class="form-control" id="basic-default-name" placeholder="Password" />
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label" for="basic-default-name">Email</label>
+                            <div class="col-sm-10">
+                              <input name="email" type="email" class="form-control" id="basic-default-name" placeholder="Email" />
+                            </div>
+                          </div>
                         <div class="row justify-content-end">
                           <div class="col-sm-10">
-                          <button type="submit" class="btn btn-primary">Update</button>
-                          <a href="{% url 'register' %}" class="btn btn-warning ms-4">Register Account</a>
-                            
-                        </div>
+                          <button type="submit" class="btn btn-primary">Send</button>
+                          </div>
                         </div>
                       </form>
-                      
                     </div>
                   </div>
-                  <p>Project file example</p><img align="center" class="col-xl "height="300" src="{% static 'assets/img/example.png' %}" alt="">
                 </div>
-                
-                <!-- <script>
-                    function validateForm() {
-                        var startColumnValue = parseInt(document.getElementsByName("start_column")[0].value);
-                        var endColumnValue = parseInt(document.getElementsByName("end_column")[0].value);
-
-                        if (endColumnValue > (startColumnValue + 4)) {
-                            alert("Task column hanya bisa dilakukan dalam range 5 kolom.");
-                            return false; 
-                        }
-                        return true; 
-                    }
-                </script> -->
+                <script>
+                  function validateForm() {
+                  var inputString = document.getElementsByName("name")[0].value;
+                  // Regular expression to match alphabets, numbers, and spaces
+                  var regex = /^[a-zA-Z0-9\s]+$/;
+                  // Check if input string contains invalid characters
+                  if (!regex.test(inputString)) {
+                      alert("Nama project hanya dapat menggunakan alfabet, spasi, dan angka.");
+                      return false; // Prevent form submission
+                  }
+                  return true; // Allow form submission
+              }
+                  </script>
                    
             <!-- / Content -->
 

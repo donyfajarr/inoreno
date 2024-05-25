@@ -194,8 +194,8 @@
                 <div class="card">
                     <h5 class="card-header">Project Issue List</h5>
                     <div class="d-flex justify-content-between">
-                      <h5 class="ms-4"><a href="{% url 'addissue'%}"><button class="btn btn-primary float-right">Add Issue</button></a></h5>
-                      <h5 class="me-4"><a href=""><button class="btn btn-warning float-right">Export into CSV</button></a></h5>
+                      <h5 class="ms-4"><a href="{% url 'addissue'% }"><button class="btn btn-primary float-right">Add Issue</button></a></h5>
+                      <h5 class="me-4"><a href="{% url 'export_csv' id %}"><button class="btn btn-warning float-right">Export into CSV</button></a></h5>
                     </div>
                      <div class="table-responsive text-nowrap">
                     <table class="table">
@@ -213,13 +213,17 @@
                         {% for item in listissue %}
                             <tr>
                                 <td><a href="{% url 'listdetails' item.id %}">{{item.subject}}</a></td>
-                                {% if item.2 == "New" %}
-                                <td><span class="badge bg-label-primary me-1">{{item.status}}</span></td>
-                            {% elif item.2 == "On Progress" %}
-                                <td><span class="badge bg-label-info me-1">{{item.status}}</span></td>
-                            {% else %}
-                                <td><span class="badge bg-label-secondary me-1">{{item.status}}</span></td>
-                            {% endif %}
+                                <td>
+                                {% if item.status.jenis == 'Open' %}
+                                <span class="badge bg-label-primary">{{ item.status }}</span>
+                              {% elif item.status.jenis == 'Under Review' %}
+                                <span class="badge bg-label-warning">{{ item.status }}</span>
+                              {% elif item.status.jenis == 'Closed' %}
+                                <span class="badge bg-label-info">{{ item.status }}</span>
+                              {% else %}
+                                <span class="badge bg-label-secondary">{{ item.status }}</span> <!-- Default case, if needed -->
+                              {% endif %}
+                              </td>
                                 <td>{{item.assignee}}</td>
                                 <td>{{item.start_date}}</td>
                                 <td>{{item.due_date}}</td>
