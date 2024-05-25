@@ -250,7 +250,7 @@
                               
                                 <select name="priority_{{item.name}}" class="form-select" id="exampleFormControlSelect1" aria-label="Default select example">
                                   {% for i in allpriority %}
-                                  {% if i.jenis == "Normal" %}
+                                  {% if i.jenis == item.priority %}
                                   <option selected value="{{i.id}}">{{i.jenis}}</option>
                                   {% else %}
                                   <option value="{{i.id}}">{{i.jenis}}</option>

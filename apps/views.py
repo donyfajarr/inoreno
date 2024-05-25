@@ -14,6 +14,8 @@ from django.http import JsonResponse
 import requests
 import urllib.parse
 from urllib.parse import unquote
+import csv
+from django.http import HttpResponse
 
 @login
 def index(request):
@@ -210,7 +212,8 @@ def settings(request):
                 'start_column' : get.start_column,
                 'end_column' : get.end_column,
                 'pic_column' : get.pic_column,
-                'email_column' : get.email_column
+                'email_column' : get.email_column,
+                'priority_column' : get.priority_column
             }
         except ObjectDoesNotExist:
             create = models.settings.objects.create(user=user)
@@ -222,7 +225,8 @@ def settings(request):
                 'start_column' : get.start_column,
                 'end_column' : get.end_column,
                 'pic_column' : get.pic_column,
-                'email_column' : get.email_column
+                'email_column' : get.email_column,
+                'priority_column' : get.priority_column
             }
         return render(request, 'settings.html',{
     'dict' : dict})
@@ -235,6 +239,7 @@ def settings(request):
         get.end_column = request.POST['end_column']
         get.pic_column = request.POST['pic_column']
         get.email_column = request.POST['email_column']
+        get.priority_column = request.POST['priority_column']
         get.save()
         return redirect('settings')
     
@@ -345,6 +350,9 @@ def confirmation (request, id):
                             findperson = findperson.split(',')
                         else:
                             findperson = [findperson]
+                    findpriority = ws.cell(idx + start_row, get.priority_column).value
+                    if findpriority is not None:
+                        findpriority = findpriority.capitalize()
 
                     current_task = {
                         'name': value,
@@ -352,6 +360,7 @@ def confirmation (request, id):
                         'due_date': end_date,
                         'pic': findpic,
                         'person': findperson,
+                        'priority' : findpriority,
                         'subtasks': []
                     }
                     tasks_data.append(current_task)
@@ -398,7 +407,11 @@ def confirmation (request, id):
                                     findperson = findperson.split(',')
                                 else:
                                     findperson = [findperson]
-                       
+                            findpriority = ws.cell(idx + start_row, get.priority_column).value
+                            if findpriority is not None:
+                                findpriority = findpriority.capitalize()
+                                print(findpriority)
+                            print(findpriority)
 
                             subtask = {
                                 'name': subtask_value,
@@ -406,6 +419,7 @@ def confirmation (request, id):
                                 'start_date': start_date,
                                 'due_date': end_date,
                                 'person': findperson,
+                                'priority' : findpriority,
                                 'subtasks': []
                             }
 
@@ -445,7 +459,7 @@ def confirmation (request, id):
 
             request.session['forprint'] = forprint
             request.session['name'] = id
-
+            print(forprint[3]['priority'])
             return render (request, 'confirmation.html', {
                 'tasks_data' : forprint,
                 'allpriority' : allpriority
@@ -627,7 +641,8 @@ def updateissue(request,id):
             get.start_date = start_date
         if due_date:
             get.due_date = due_date
-        get.priority = getpriority
+        get.id_priority = getpriority
+        print(getpriority)
         gettask = models.task.objects.get(id=id)
         if addpic:
             registerpic = models.pic.objects.create(id_task=gettask, pic=addpic)
@@ -640,8 +655,6 @@ def deleteissue(request,id):
     get.delete()
     idproject = request.session.get('idproject')
     return redirect('listissue', id=idproject)
-
-
 
 def user_login(request):
     if request.method == "GET":
@@ -666,9 +679,6 @@ def user_login(request):
 def user_logout (request):
     logout(request)
     return redirect ('login')
-
-
-
 
 @login
 def send_email(request):
@@ -784,8 +794,7 @@ def register(request):
 
     })
 
-import csv
-from django.http import HttpResponse
+@login
 def export_csv(request, id):
     
     getproject = models.project.objects.get(id=id)

@@ -203,6 +203,7 @@
                         <tr>
                             <th>Issue</th>
                             <th>Status</th>
+                            <th>Priority</th>
                             <th>Assigned by</th>
                             <th>Start Date</th>
                             <th>Due Date</th>
@@ -224,6 +225,19 @@
                                 <span class="badge bg-label-secondary">{{ item.status }}</span> <!-- Default case, if needed -->
                               {% endif %}
                               </td>
+                                <td>
+                                  {% if item.id_priority.jenis == 'Low' %}
+                                <span class="badge bg-label-success">{{ item.id_priority }}</span>
+                              {% elif item.id_priority.jenis == 'Normal' %}
+                                <span class="badge bg-label-info">{{ item.id_priority }}</span>
+                              {% elif item.id_priority.jenis == 'High' %}
+                                <span class="badge bg-label-warning">{{ item.id_priority }}</span>
+                              {% elif item.id_priority.jenis == 'Urgent' %}
+                                <span class="badge bg-label-danger">{{ item.id_priority }}</span>
+                              {% else %}
+                                <span class="badge bg-label-danger">{{ item.id_priority }}</span> <!-- Default case, if needed -->
+                              {% endif %}
+                                </td>
                                 <td>{{item.assignee}}</td>
                                 <td>{{item.start_date}}</td>
                                 <td>{{item.due_date}}</td>

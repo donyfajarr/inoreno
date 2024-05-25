@@ -66,6 +66,7 @@ class settings(models.Model):
     end_column = models.IntegerField(default='6')
     pic_column = models.IntegerField(default='8')
     email_column = models.IntegerField(default='61')
+    priority_column = models.IntegerField(default='62')
 
     def __str__(self):
         return str(self.user)
