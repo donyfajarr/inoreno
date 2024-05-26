@@ -141,7 +141,7 @@ def get_project_data(request):
     # If the request method is not GET or it's not an AJAX request, return an empty response or appropriate error
     return JsonResponse({'error': 'Invalid request'})
 @login
-def addissue(request):
+def addissue(request, id):
     if request.method == "GET":
         getallproject = models.project.objects.all()
         allstatus = models.status.objects.all()
@@ -287,7 +287,9 @@ def confirmation (request, id):
                     cell = ws.cell(row=row_index, column=col_index)
                     if isinstance(cell.fill.fgColor.theme, int) or (cell.fill.fgColor.rgb != 'FFFF0000' and  cell.fill.fgColor.rgb !='00000000'):
                         findweek = ws.cell(get.week_number_row, col_index).value
+                        print(findweek)
                         filled_cells.append(findweek)
+                        print(filled_cells)
 
                 return filled_cells if filled_cells else None
             
@@ -497,7 +499,8 @@ def confirmation (request, id):
                     due_date = due_date,
                     id_priority = pri,)
                 create.save()
-                for email in responsible:
+                distinct = list(set(responsible))
+                for email in distinct:
                     getid = models.task.objects.get(id=create.id)
                     pic = models.pic(id_task=getid, pic=email)
                     pic.save()
@@ -534,7 +537,7 @@ def updateproject(request, id):
 @login
 def listissue(request,id):
     listissue = models.task.objects.filter(id_project = id)
-    request.session['idproject'] = id
+    id = request.session['idproject'] = id
     return render(request, 'listissue.html', {
         'listissue' : listissue,
         'id' : id
@@ -566,6 +569,8 @@ def listdetails(request, id):
         description = request.POST['description']
         get = models.task.objects.get(id=id)
         receipent = get.assignee.email
+        getstatus = models.status.objects.get(jenis = "Under Review")
+        get.status = getstatus
         fullname = get.assignee.first_name + " " + get.assignee.last_name
         email_api = "http://10.24.7.70:3333/send-email"
         subject = f"#{get.id}-{get.subject} Task Feedback"
@@ -588,6 +593,7 @@ def listdetails(request, id):
     #    response = requests.post(email_api, json=payload)
     #     if response.status_code == 200:
     #         print("Email sent successfully.")
+        get.save()
     #     else:
     #         print(f"Failed to send email. Status code: {response.status_code}")
     #         print(response.text)
@@ -686,9 +692,10 @@ def send_email(request):
         today = date.today()
         
         # Query tasks
-        start_today_tasks = models.task.objects.filter(start_date=today)
-        end_today_tasks = models.task.objects.filter(due_date=today)
-        ongoing_tasks = models.task.objects.filter(assignee=request.user, start_date__lte=today, due_date__gte=today)
+        getstatusopen = models.status.objects.get(id=1)
+        start_today_tasks = models.task.objects.filter(start_date=today, status=getstatusopen)
+        end_today_tasks = models.task.objects.filter(due_date=today, status=getstatusopen)
+        ongoing_tasks = models.task.objects.filter(assignee=request.user, start_date__lte=today, due_date__gte=today, status=getstatusopen)
 
         def find_pic(task):
             return list(models.pic.objects.filter(id_task=task))
