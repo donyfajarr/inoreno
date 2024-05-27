@@ -9,9 +9,22 @@ def send_email(request):
         
         # Query tasks
         getstatusopen = models.status.objects.get(id=1)
-        start_today_tasks = models.task.objects.filter(start_date=today, status=getstatusopen)
-        end_today_tasks = models.task.objects.filter(due_date=today, status=getstatusopen)
-        ongoing_tasks = models.task.objects.filter(assignee=request.user, start_date__lte=today, due_date__gte=today, status=getstatusopen)
+        start_today_tasks = models.task.objects.filter(start_date=today,status=getstatusopen).exclude(due_date=today)
+
+# Tasks that are due today
+        end_today_tasks = models.task.objects.filter(
+            due_date=today,
+            status=getstatusopen
+        ).exclude(start_date=today)
+
+        # Ongoing tasks excluding tasks that start and end today
+        ongoing_tasks = models.task.objects.filter(
+            assignee=request.user,
+            start_date__lt=today,  # Started before today
+            due_date__gt=today,    # Due after today
+            status=getstatusopen
+        )
+                
 
         def find_pic(task):
             return list(models.pic.objects.filter(id_task=task))
@@ -69,17 +82,17 @@ def send_email(request):
             email_api = "http://10.24.7.70:3333/send-email"
             payload = {
                 "to": [to],
-                "cc": [],
+                "cc": [cc],
                 "subject": subject,
                 "body": body
             }
             print(payload)
-        #     response = requests.post(email_api, json=payload)
-        #     if response.status_code == 200:
-        #         print("Email sent successfully.")
-        #     else:
-        #         print(f"Failed to send email. Status code: {response.status_code}")
-        #         print(response.text)
+            response = requests.post(email_api, json=payload)
+            if response.status_code == 200:
+                print("Email sent successfully.")
+            else:
+                print(f"Failed to send email. Status code: {response.status_code}")
+                print(response.text)
 
         # # Process tasks and send emails
         for task in start_today_tasks:
