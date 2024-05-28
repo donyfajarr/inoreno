@@ -790,12 +790,12 @@ def send_email(request):
                 "body": body
             }
             print(payload)
-            # response = requests.post(email_api, json=payload)
-            # if response.status_code == 200:
-            #     print("Email sent successfully.")
-            # else:
-            #     print(f"Failed to send email. Status code: {response.status_code}")
-            #     print(response.text)
+            response = requests.post(email_api, json=payload)
+            if response.status_code == 200:
+                print("Email sent successfully.")
+            else:
+                print(f"Failed to send email. Status code: {response.status_code}")
+                print(response.text)
 
         # # Process tasks and send emails
         for task in start_today_tasks:

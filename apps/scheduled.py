@@ -38,17 +38,20 @@ def send_email(request):
             start_date = task.start_date
             due_date = task.due_date
             task_id = task.id
-
+            task_parent = task.parent
+            task_link = task.id_project.link
             encoded_email = urllib.parse.quote(recipient_email)
             if status == 'start':
                 body = f"""
                 Dear {general_name},
 
                 You have a task that started today and will be due on {due_date} from the {project_name} project
-                with the task subject: {subject}.
+                with the task subject: {subject} of {task_parent}.
 
-                View more at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
-
+                Give your feedback at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
+                
+                or view our project timeline at {task_link}
+                
                 Regards,
                 {author_name}
                 """
@@ -57,10 +60,12 @@ def send_email(request):
                 Dear {general_name},
 
                 You still have a running task that started on {start_date} and will be due on {due_date}
-                from the {project_name} project with the task subject: {subject}.
+                from the {project_name} project with the task subject: {subject} of {task_parent}.
 
-                View more at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
-
+                Give your feedback at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
+                
+                or view our project timeline at {task_link}
+                
                 Regards,
                 {author_name}
                 """
@@ -69,9 +74,11 @@ def send_email(request):
                 Dear {general_name},
 
                 You have a task that will be due today ({due_date}) from the {project_name} project
-                with the task subject: {subject}.
+                with the task subject: {subject} of {task_parent}.
 
-                View more at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
+                Give your feedback at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
+
+                or view our project timeline at {task_link}                
 
                 Regards,
                 {author_name}
