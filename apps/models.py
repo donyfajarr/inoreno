@@ -15,6 +15,8 @@ class project(models.Model):
     desc = models.TextField(max_length=150)
     status = models.ForeignKey(status, on_delete=models.CASCADE)
     assignee = models.ForeignKey(User, on_delete = models.CASCADE)
+    link = models.URLField(max_length=200, blank=True, null=True)
+
     def __str__(self):
         return str(self.subject)
     
@@ -35,6 +37,7 @@ class task(models.Model):
     due_date = models.DateField(null=True)
     assignee = models.ForeignKey(User, on_delete = models.CASCADE)
     status = models.ForeignKey(status,on_delete=models.CASCADE, default=1)
+    parent = models.CharField(max_length=50, null=True, blank=True)
 
     def __str__(self):
         return str(self.subject)

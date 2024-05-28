@@ -252,6 +252,10 @@ def confirmation (request, id):
         forprint = list()
         if 'upload' in request.POST:
             # LOAD XLSX
+            link = request.POST['link']
+            find = models.project.objects.get(id=id)
+            find.link = link
+            find.save()
             files = request.FILES['filea']
             wb = load_workbook(files)
             ws = wb.active
@@ -456,7 +460,7 @@ def confirmation (request, id):
             process_tasks(tasks_data)
 
 
-            # print(forprint)
+            print(forprint)
             # SESSION THE DATA TO BE PASSED INTO AFTER POST LOGIC
 
             request.session['forprint'] = forprint
@@ -479,11 +483,12 @@ def confirmation (request, id):
                 form_due_date = f"due_date_{item['name']}"
                 form_responsible = f"responsible_{item['name']}[]"
                 form_priority = f"priority_{item['name']}"
+                form_parent = f"parenttask_{item['name']}"
                 subject = request.POST.get(form_name)
                 start_date = request.POST.get(form_start_date)
                 due_date = request.POST.get(form_due_date)
                 assigned_to = request.user
-                
+                parent = request.POST.get(form_parent)
                 priority = request.POST.get(form_priority)
                 
                 responsible = request.POST.getlist(form_responsible)
@@ -498,7 +503,10 @@ def confirmation (request, id):
                     start_date = start_date,
                     due_date = due_date,
                     id_priority = pri,)
+                if parent:
+                    create.parent = parent
                 create.save()
+                
                 distinct = list(set(responsible))
                 for email in distinct:
                     getid = models.task.objects.get(id=create.id)
@@ -526,10 +534,12 @@ def updateproject(request, id):
     else:
         subject = request.POST.get('subject', '')  # Safely retrieve 'subject' from POST data
         description = request.POST.get('description', '')  # Safely retrieve 'description' from POST data
-        
+        link = request.POST.get('link', '')
         # Update the project object with the retrieved values
         update.subject = subject
         update.desc = description
+        update.link = link
+
         update.save()
         return redirect ('listproject')
 
@@ -630,6 +640,7 @@ def updateissue(request,id):
         priority = request.POST['priority']
         addpic = request.POST['addpic']
         pic = request.POST.getlist("pic")
+        parent = request.POST['parent']
 
         get.subject = subject
         getstatus = models.status.objects.get(id=status)
@@ -647,6 +658,7 @@ def updateissue(request,id):
             get.start_date = start_date
         if due_date:
             get.due_date = due_date
+        get.parent = parent
         get.id_priority = getpriority
         print(getpriority)
         gettask = models.task.objects.get(id=id)
@@ -722,17 +734,20 @@ def send_email(request):
             start_date = task.start_date
             due_date = task.due_date
             task_id = task.id
-
+            task_parent = task.parent
+            task_link = task.id_project.link
             encoded_email = urllib.parse.quote(recipient_email)
             if status == 'start':
                 body = f"""
                 Dear {general_name},
 
                 You have a task that started today and will be due on {due_date} from the {project_name} project
-                with the task subject: {subject}.
+                with the task subject: {subject} of {task_parent}.
 
-                View more at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
-
+                Give your feedback at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
+                
+                or view our project timeline at {task_link}
+                
                 Regards,
                 {author_name}
                 """
@@ -741,10 +756,12 @@ def send_email(request):
                 Dear {general_name},
 
                 You still have a running task that started on {start_date} and will be due on {due_date}
-                from the {project_name} project with the task subject: {subject}.
+                from the {project_name} project with the task subject: {subject} of {task_parent}.
 
-                View more at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
-
+                Give your feedback at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
+                
+                or view our project timeline at {task_link}
+                
                 Regards,
                 {author_name}
                 """
@@ -753,9 +770,11 @@ def send_email(request):
                 Dear {general_name},
 
                 You have a task that will be due today ({due_date}) from the {project_name} project
-                with the task subject: {subject}.
+                with the task subject: {subject} of {task_parent}.
 
-                View more at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
+                Give your feedback at: http://10.24.7.165/listdetails/{task_id}?email={encoded_email}
+
+                or view our project timeline at {task_link}                
 
                 Regards,
                 {author_name}
@@ -771,12 +790,12 @@ def send_email(request):
                 "body": body
             }
             print(payload)
-            response = requests.post(email_api, json=payload)
-            if response.status_code == 200:
-                print("Email sent successfully.")
-            else:
-                print(f"Failed to send email. Status code: {response.status_code}")
-                print(response.text)
+            # response = requests.post(email_api, json=payload)
+            # if response.status_code == 200:
+            #     print("Email sent successfully.")
+            # else:
+            #     print(f"Failed to send email. Status code: {response.status_code}")
+            #     print(response.text)
 
         # # Process tasks and send emails
         for task in start_today_tasks:
