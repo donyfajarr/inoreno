@@ -691,7 +691,7 @@ def user_login(request):
             request.session['password'] = password
             return redirect("index")
         else:
-            messages.error(request, "Username atau Password Anda Salah!").delete()
+            messages.error(request, "Username atau Password Anda Salah!")
             return redirect("login")
 @login
 def user_logout (request):
