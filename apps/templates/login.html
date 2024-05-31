@@ -66,7 +66,8 @@
 
   <body>
     <!-- Content -->
-
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="path/to/your/styles.css">
     <div class="container-xxl">
       <div class="authentication-wrapper authentication-basic container-p-y">
         <div class="authentication-inner">
@@ -74,12 +75,11 @@
           <div class="card">
             <div class="card-body">
               <!-- Logo -->
-              <div class="app-brand justify-content-center">
-                <a href="index.html" class="app-brand-link gap-2">
-                  <span class="app-brand-logo demo">
-                    <img src="{% static 'assets/img/favicon/logonew.png' %}" alt="App Logo" width="95">
+              <div class="app-brand justify-content-center mb-4">
+                <a href="{% url 'index' %}" class="app-brand-link gap-2">
+                  <span class="app-brand-logo">
+                    <img src="{% static 'assets/img/favicon/logonew.png' %}" alt="App Logo" width="250">
                   </span>
-                  <span class="app-brand-text demo fw-bolder" style="color:#026141">innoreno</span>
                 </a>
               </div>
               <!-- /Logo -->
