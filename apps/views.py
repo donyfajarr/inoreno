@@ -22,22 +22,40 @@ def index(request):
     first_name = request.user.first_name
     last_name = request.user.last_name
     user = first_name + " " + last_name
+
+    # Total Ongoing Projects
     sum = models.project.objects.filter(assignee = request.user).exclude(Q(status=3)).count()
-    rawproject = models.project.objects.filter(assignee = request.user).count()
-    rawprojects = models.project.objects.filter(assignee = request.user)
-    totaltask = models.task.objects.filter(assignee = request.user).exclude(Q(status=3)).count()
-    rawtask = models.task.objects.filter(assignee = request.user).count()
-    alltask = models.task.objects.filter(assignee = request.user).order_by('due_date').exclude(Q(due_date=None))
-    opentask = models.task.objects.filter(assignee = request.user, status=1).count()
-    opentaskraw = models.task.objects.filter(assignee = request.user, status=1, due_date__isnull=False).order_by("due_date")
-    # undertask = models.task.objects.filter(assignee = request.user, status=2).count()
-    closetask = models.task.objects.filter(assignee = request.user, status=3).count()
-    rawunder = models.task.objects.filter(assignee = request.user, status=2)
-    undertask = rawunder.count()
-    today = date.today()
-    start_of_week = today - timedelta(days=today.weekday())
+    
+    # Mencari Ongoing Project
     closeproject = models.project.objects.filter(assignee = request.user, status=3).count()
 
+    # Total Semua Projects
+    rawproject = models.project.objects.filter(assignee = request.user).count()
+    rawprojects = models.project.objects.filter(assignee = request.user)
+    
+    # Total Ongoing Task
+    totaltask = models.task.objects.filter(assignee = request.user).exclude(Q(status=3)).count()
+    
+    # Total Semua Task
+    rawtask = models.task.objects.filter(assignee = request.user).count()
+    
+    # Mencari Closest Due Date Task
+    alltask = models.task.objects.filter(assignee = request.user).order_by('due_date').exclude(Q(due_date=None))
+    opentaskraw = models.task.objects.filter(assignee = request.user, status=1, due_date__isnull=False).order_by("due_date")
+    
+    # Jumlah Task yang open, close, dan underreview
+    opentask = models.task.objects.filter(assignee = request.user, status=1).count()
+    closetask = models.task.objects.filter(assignee = request.user, status=3).count()
+    rawunder = models.task.objects.filter(assignee = request.user, status=2)
+
+    # Jumlah underreview task
+    undertask = rawunder.count()
+
+    # Mencari tanggal hari ini
+    today = date.today()
+    start_of_week = today - timedelta(days=today.weekday())
+
+    # Dibawah ini data untuk grafik pada dashboard
     categories = []
     open_counts = []
     closed_counts = []
@@ -71,7 +89,7 @@ def index(request):
     totalproject = models.project.objects.filter(assignee=request.user).count()
     closeproject = totalproject - sum
     reviewproject = totalproject - sum - closeproject
-  
+
     json_chartdata = json.dumps(chartdata)
     json_data = json.dumps(data)
     return render(request, 'index.html', {
@@ -94,17 +112,16 @@ def index(request):
     
     })
 
+# Ini function untuk menghandle input dari grafik
 def get_project_data(request):
     
     if request.method == 'GET':
         
+        # Mengembalikan project terpilih
         selected_project = request.GET.get('project_id')
-      
-        # Fetch data for the selected project
-        # For example, let's assume you have a Task model with 'project' field
         tasks = models.task.objects.filter(id_project=selected_project)
     
-        # Process the data and prepare it for the response
+        # Mencari data updatean
         closed_counts = []
         open_counts = []
         categories = []
@@ -117,10 +134,8 @@ def get_project_data(request):
             open_tasks = tasks.filter(assignee = request.user, status__in=[1,2], due_date=day).count()
             closed_counts.append(closed_tasks)
             open_counts.append(-open_tasks)
-        # Perform calculations or processing to get the desired data
-        # Here, we'll just count the tasks for each status for demonstration purposes
 
-        # Prepare the data to be sent back to the client
+        # Mengembalikan degan json untuk diload di grafik
         series = [
         {
             "name": "Closed",
@@ -134,12 +149,11 @@ def get_project_data(request):
         data = {
             'series' : series
         }
-
-        # Return the data in JSON format
         return JsonResponse(data)
 
-    # If the request method is not GET or it's not an AJAX request, return an empty response or appropriate error
     return JsonResponse({'error': 'Invalid request'})
+
+# Ini Function untuk Tambah Task
 @login
 def addissue(request, id):
     if request.method == "GET":
@@ -196,6 +210,7 @@ def newproject(request):
         return redirect('confirmation', id=newproject.id)
     return render(request, 'newproject.html')
 
+# Ini function untuk mengubah settings dari baris dan kolom pada template excel
 @login
 def settings(request):
     user = request.user
@@ -243,10 +258,13 @@ def settings(request):
         get.save()
         return redirect('settings')
     
+# Ini function untuk membaca file excel yang diupload pada melakukan new project
 @login
 def confirmation (request, id):
     if request.method == 'POST':
+        # Mengambil settings akun yang login dari database
         get = models.settings.objects.get(user=request.user)
+
         allpriority = models.priority.objects.all()
 
         forprint = list()
@@ -263,8 +281,8 @@ def confirmation (request, id):
             # START GANTT CHART ROW
             start_row = get.start_row
 
-            # STORED COLUMN VALUES
-
+            
+            # Function untuk mencari rentang waktu dari nomor weeks
             def get_date_range_for_week(year, week_start, week_end):
                 if week_start is None or week_start < 1:
                     return []
@@ -286,7 +304,7 @@ def confirmation (request, id):
                 
             def find_col_with_filled_color(ws, row_index):
                 filled_cells = []
-                # 9 STATE THE COLUMN GANTT CHART STARTED
+                # START ITERATION FROM THE COLUMN GANTT_START_COLUMN STARTED
                 for col_index in range(get.gannt_start_column, ws.max_column + 1):
                     cell = ws.cell(row=row_index, column=col_index)
                     
@@ -302,8 +320,7 @@ def confirmation (request, id):
                 all[f'col{i}_values'] = []
             all['col_end'] = []
 
-            # ITERATE COLUMN 2 AS A BASE
-
+            # ITERATE COLUMN START_ROW AS A BASE
             for row in ws.iter_rows(min_row=start_row,min_col=get.start_column,max_col=get.start_column, values_only=True):
                 cell_value = row[0] if row and row[0] is not None else None
                 all['col_start'].append(cell_value)  
@@ -335,7 +352,7 @@ def confirmation (request, id):
                         else:
                             week_start = min(p)
                             week_end = None
-
+                        # Get Ranges masih manual pakai tahun 2024
                         get_ranges = get_date_range_for_week(2024, week_start, week_end)
                         for start_date, end_date in get_ranges:
                             start_date = start_date.strftime('%Y-%m-%d')
@@ -378,12 +395,11 @@ def confirmation (request, id):
                         current_tasks[key] = None
 
                 else:
-                    # Iterate through remaining columns to find subtasks
+                    # Iterasi kembali pada column yang tersisa untuk mencari subtasks
                     for key in list(all.keys())[1:]:
                         col_values = all[key]
                         subtask_value = col_values[idx]
                         if subtask_value is not None:
-                          
                             p = find_col_with_filled_color(ws, idx + start_row)
                             if p is not None:
                                 if len(p) > 1:
@@ -415,7 +431,6 @@ def confirmation (request, id):
                             findpriority = ws.cell(idx + start_row, get.priority_column).value
                             if findpriority is not None:
                                 findpriority = findpriority.capitalize()
-                 
 
                             subtask = {
                                 'name': subtask_value,
@@ -427,7 +442,7 @@ def confirmation (request, id):
                                 'subtasks': []
                             }
 
-                            # Find the appropriate parent task for the current subtask
+                            # Memberikan key parent untuk mengetahui parent tasks
                             for parent_key in reversed(list(current_tasks.keys())[:list(current_tasks.keys()).index(key)]):
                                 if current_tasks[parent_key] is not None:
                                     if 'subtasks' not in current_tasks[parent_key]:
@@ -443,8 +458,6 @@ def confirmation (request, id):
                                 current_tasks[subsequent_key] = None
 
             
-
-         
             # IT IS USED TO ATTACH A PARENT NAME KEYS FOR A SUBTASKS BASED ON A SUBTASKS THAT CONTAINED IN PARENT
             def process_tasks(tasks, parent_name=None):
                 for task in tasks:
