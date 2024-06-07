@@ -71,7 +71,7 @@ def index(request):
     totalproject = models.project.objects.filter(assignee=request.user).count()
     closeproject = totalproject - sum
     reviewproject = totalproject - sum - closeproject
-    print(rawunder)
+  
     json_chartdata = json.dumps(chartdata)
     json_data = json.dumps(data)
     return render(request, 'index.html', {
@@ -289,11 +289,10 @@ def confirmation (request, id):
                 # 9 STATE THE COLUMN GANTT CHART STARTED
                 for col_index in range(get.gannt_start_column, ws.max_column + 1):
                     cell = ws.cell(row=row_index, column=col_index)
-                    if isinstance(cell.fill.fgColor.theme, int) or (cell.fill.fgColor.rgb != 'FFFF0000' and  cell.fill.fgColor.rgb !='00000000'):
+                    
+                    if isinstance(cell.fill.fgColor.theme, int) or (cell.fill.fgColor.rgb != 'FFFF0000' and  cell.fill.fgColor.rgb !='00000000' and cell.fill.fgColor.rgb !='FFFFFF00'):
                         findweek = ws.cell(get.week_number_row, col_index).value
-                        print(findweek)
                         filled_cells.append(findweek)
-                        print(filled_cells)
 
                 return filled_cells if filled_cells else None
             
@@ -416,8 +415,7 @@ def confirmation (request, id):
                             findpriority = ws.cell(idx + start_row, get.priority_column).value
                             if findpriority is not None:
                                 findpriority = findpriority.capitalize()
-                                print(findpriority)
-                            print(findpriority)
+                 
 
                             subtask = {
                                 'name': subtask_value,
@@ -460,12 +458,12 @@ def confirmation (request, id):
             process_tasks(tasks_data)
 
 
-            print(forprint)
+            
             # SESSION THE DATA TO BE PASSED INTO AFTER POST LOGIC
 
             request.session['forprint'] = forprint
             request.session['name'] = id
-            print(forprint[3]['priority'])
+            
             return render (request, 'confirmation.html', {
                 'tasks_data' : forprint,
                 'allpriority' : allpriority
@@ -600,6 +598,7 @@ def listdetails(request, id):
             "body": body
         }
         print(payload)
+        print(datetime.now())
         response = requests.post(email_api, json=payload)
         if response.status_code == 200:
             print("Email sent successfully.")
@@ -614,7 +613,7 @@ def listdetails(request, id):
 @login
 def newissue(request):
     allissue = models.task.objects.filter(assignee = request.user)
-    print(allissue)
+    
     return render(request, 'newissue.html',{
         'allissue' : allissue
     })
@@ -625,7 +624,7 @@ def updateissue(request,id):
     getpic = models.pic.objects.filter(id_task = id)
     allstatus = models.status.objects.all()
     if request.method == "GET":
-        print(getpic)
+        
         return render(request, 'updateissue.html', {
             'update' : get,
             'allpriority' : allpriority,
@@ -646,11 +645,11 @@ def updateissue(request,id):
         getstatus = models.status.objects.get(id=status)
         getpriority = models.priority.objects.get(id=priority)
         get.status = getstatus
-        print('here',start_date)
+        
         gettask = models.task.objects.get(id=id)
         findpic = models.pic.objects.filter(id_task = id)
         findpic.delete()
-        print(pic)
+        
         for i in pic:
             newpic = models.pic.objects.create(id_task = gettask, pic=i)
             newpic.save()
@@ -660,7 +659,7 @@ def updateissue(request,id):
             get.due_date = due_date
         get.parent = parent
         get.id_priority = getpriority
-        print(getpriority)
+      
         gettask = models.task.objects.get(id=id)
         if addpic:
             registerpic = models.pic.objects.create(id_task=gettask, pic=addpic)
