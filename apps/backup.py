@@ -22,10 +22,15 @@ try:
 except Exception as e:
     print(f"{datetime.now()} - Backup failed: {str(e)}")
 
+# Number of backups to keep
+backups_to_keep = 5
+
 # Remove old backups
 files = os.listdir(backup_dir)
-files = [os.path.join(backup_dir, f) for f in files if f.startswith('db_backup_')]
+files = [os.path.join(backup_dir, f) for f in files if f.startswith('db_backup_') and f.endswith('.sqlite3')]
 files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-for f in files[1:]:
+
+# Only delete files beyond the number of backups to keep
+for f in files[backups_to_keep:]:
     os.remove(f)
     print(f"Deleted old backup: {f}")

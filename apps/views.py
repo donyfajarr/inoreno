@@ -827,7 +827,7 @@ def send_email(request):
             for pic in pics:
                 body = create_email_body(task, 'ongoing', pic.pic)
                 send_email(pic.pic, task.assignee.email, f"#{task.id} [{task.subject}] Task Reminder", body)
-        
+        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         return redirect('index')
     
 @login
