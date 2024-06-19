@@ -286,7 +286,12 @@ def confirmation (request, id):
             def get_date_range_for_week(year, week_start, week_end):
                 if week_start is None or week_start < 1:
                     return []
-                first_day = datetime(year, 1, 1)
+                if year == 2025:
+                    first_day = datetime(2024, 12, 30)
+                elif year == 2026:
+                    first_day = datetime(2025, 12, 29)
+                else:
+                    first_day = datetime(year, 1, 1)
                 def calculate_week_dates(week_number):
                     offset = (week_number - 1) * 7
                     start_date = first_day + timedelta(days=offset)
@@ -304,15 +309,26 @@ def confirmation (request, id):
                 
             def find_col_with_filled_color(ws, row_index):
                 filled_cells = []
+                year = None
                 # START ITERATION FROM THE COLUMN GANTT_START_COLUMN STARTED
                 for col_index in range(get.gannt_start_column, ws.max_column + 1):
                     cell = ws.cell(row=row_index, column=col_index)
                     
                     if isinstance(cell.fill.fgColor.theme, int) or (cell.fill.fgColor.rgb != 'FFFF0000' and  cell.fill.fgColor.rgb !='00000000' and cell.fill.fgColor.rgb !='FFFFFF00'):
                         findweek = ws.cell(get.week_number_row, col_index).value
+                        findyear = ws.cell(get.week_number_row - 1, col_index).value
+                        print(findyear)
+                        if findyear:
+                            if '2025' in str(findyear):
+                                year = 2025
+                            elif '2026' in str(findyear):
+                                year = 2026
+                            else:
+                                year = 2024
+                            print(year)
                         filled_cells.append(findweek)
 
-                return filled_cells if filled_cells else None
+                return filled_cells, year if filled_cells else None
             
             all = {}
             all['col_start'] = []
@@ -344,8 +360,9 @@ def confirmation (request, id):
                 if value is not None:
                     # Main Task
                  
-                    p = find_col_with_filled_color(ws, idx + start_row)
-                    if p is not None:
+                    p, year = find_col_with_filled_color(ws, idx + start_row)
+                    if p is not None and len(p) > 0:
+                        
                         if len(p) > 1:
                             week_start = min(p)
                             week_end = max(p)
@@ -353,10 +370,11 @@ def confirmation (request, id):
                             week_start = min(p)
                             week_end = None
                         # Get Ranges masih manual pakai tahun 2024
-                        get_ranges = get_date_range_for_week(2024, week_start, week_end)
-                        for start_date, end_date in get_ranges:
-                            start_date = start_date.strftime('%Y-%m-%d')
-                            end_date = end_date.strftime('%Y-%m-%d')
+                        if year:
+                            get_ranges = get_date_range_for_week(year, week_start, week_end)
+                            for start_date, end_date in get_ranges:
+                                start_date = start_date.strftime('%Y-%m-%d')
+                                end_date = end_date.strftime('%Y-%m-%d')
                     else:
                         week_start = None
                         week_end = None
@@ -400,19 +418,19 @@ def confirmation (request, id):
                         col_values = all[key]
                         subtask_value = col_values[idx]
                         if subtask_value is not None:
-                            p = find_col_with_filled_color(ws, idx + start_row)
-                            if p is not None:
+                            p, year = find_col_with_filled_color(ws, idx + start_row)
+                            if p is not None and len(p) > 0:
                                 if len(p) > 1:
                                     week_start = min(p)
                                     week_end = max(p)
                                 else:
                                     week_start = min(p)
                                     week_end = None
-
-                                get_ranges = get_date_range_for_week(2024, week_start, week_end)
-                                for start_date, end_date in get_ranges:
-                                    start_date = start_date.strftime('%Y-%m-%d')
-                                    end_date = end_date.strftime('%Y-%m-%d')
+                                if year:
+                                    get_ranges = get_date_range_for_week(year, week_start, week_end)
+                                    for start_date, end_date in get_ranges:
+                                        start_date = start_date.strftime('%Y-%m-%d')
+                                        end_date = end_date.strftime('%Y-%m-%d')
                             else:
                                 week_start = None
                                 week_end = None
