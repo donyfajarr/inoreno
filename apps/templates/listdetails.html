@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 {% load static %}
 <html
   lang="en"
@@ -130,13 +130,23 @@
               <!-- Basic Layout & Basic with Icons -->
                 <!-- Basic Layout -->
                 <div class="col-xxl">
+                  <h4 class="fw-bold py-3 mb-4">
+                   
+                    {% for loop in parent %}
+                    <span class="text-muted fw-light">{{loop}} /</span> 
+                    {% endfor %} {{get.subject}}</h4>
+                   
                   <div class="card mb-4">
-                    <div class="ms-4 mt-4 mb-3 d-flex align-items-center">
-                      <h1 class="mb-0 fw-bold fs-2">{{get.parent}}</h1>
-                    </div>
-                    <div class="mt-0">
-                      <h3 class="mb-0 ms-4 fs-5 fw-semibold">{{get.subject}}<span class="fs-5 text-muted">#{{get.id}}</span></h3>
-                    </div>
+                    <div class="ms-4 mt-4 mb-2">
+                                      <h1 class="mb-0 fw-semibold {% if forloop.counter0 == 0 %}fs-3{% elif forloop.counter0 == 1 %}fs-4{% elif forloop.counter0 == 2 %}fs-5{% elif forloop.counter0 == 3 %}fs-6{% else%}fs-6{% endif %}">
+                                          {{ item }}
+                                      </h1>
+                                  </div>
+
+                  <div class="mt-0 ms-4">
+                    <h3 class="mb-0 fw-semibold"><mark>{{ get.subject }}</span><span class="text-muted">#{{ get.id }}</span></mark>
+                    </h3>
+                  </div>
                     
                     <div class="card-body">
                       

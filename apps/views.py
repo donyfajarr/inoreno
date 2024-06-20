@@ -16,6 +16,7 @@ import urllib.parse
 from urllib.parse import unquote
 import csv
 from django.http import HttpResponse
+import ast
 
 @login
 def index(request):
@@ -157,7 +158,7 @@ def get_project_data(request):
 @login
 def addissue(request, id):
     if request.method == "GET":
-        getallproject = models.project.objects.all()
+        getallproject = models.project.objects.filter(assignee=request.user)
         allstatus = models.status.objects.all()
         allpriority = models.priority.objects.all()
         return render(request, 'addissue.html', {
@@ -460,6 +461,7 @@ def confirmation (request, id):
                                 'subtasks': []
                             }
 
+
                             # Memberikan key parent untuk mengetahui parent tasks
                             for parent_key in reversed(list(current_tasks.keys())[:list(current_tasks.keys()).index(key)]):
                                 if current_tasks[parent_key] is not None:
@@ -477,18 +479,27 @@ def confirmation (request, id):
 
             
             # IT IS USED TO ATTACH A PARENT NAME KEYS FOR A SUBTASKS BASED ON A SUBTASKS THAT CONTAINED IN PARENT
-            def process_tasks(tasks, parent_name=None):
+            def process_tasks(tasks, parent_hierarchy=None):
+                if parent_hierarchy is None:
+                    parent_hierarchy = []
+                    
                 for task in tasks:
-                    task['Parent'] = parent_name
+                    task['Parent'] = parent_hierarchy  # Assign the current parent hierarchy list to 'Parent' key
                     forprint.append(task)
+                    
+                    # Recursively process subtasks
                     if 'subtasks' in task and task['subtasks']:
-                        process_tasks(task['subtasks'], parent_name=task['name'])
+                        # Pass the updated hierarchy, including the current task's name, to the subtasks
+                        process_tasks(task['subtasks'], parent_hierarchy + [task['name']])
+                        
+                    # Remove 'subtasks' key to flatten the structure
                     if 'subtasks' in task:
                         del task['subtasks']
             
+            
             process_tasks(tasks_data)
-
-
+            print(forprint)
+            
             
             # SESSION THE DATA TO BE PASSED INTO AFTER POST LOGIC
 
@@ -525,6 +536,7 @@ def confirmation (request, id):
                 pri = models.priority.objects.get(id=priority)
                 start_date = parse_date(start_date) if start_date else None
                 due_date = parse_date(due_date) if due_date else None
+                print(parent)
                 create = models.task(
                     id_project = ids,
                     subject = subject, 
@@ -588,7 +600,11 @@ def listdetails(request, id):
         get = models.task.objects.get(id=id)
         getproject = get.id_project
         getpic = models.pic.objects.filter(id_task = id)
-        
+        if get.parent:
+            parent = ast.literal_eval(get.parent)
+            parent = [s for s in parent if 'phase' not in s.lower()]
+        else:
+            parent = None
         listpic = []
         for item in getpic:
             listpic.append(item.pic)
@@ -601,6 +617,7 @@ def listdetails(request, id):
         "getproject" : getproject,
         'getpic' : listpic,
         'email' : email,
+        'parent' : parent,
         'id' : id
     })
     else:
@@ -612,11 +629,11 @@ def listdetails(request, id):
         get.status = getstatus
         fullname = get.assignee.first_name + " " + get.assignee.last_name
         email_api = "http://10.24.7.70:3333/send-email"
-        subject = f"#{get.id} [{get.subject}] Task Feedback"
+        subject = f"#{get.id} [{get.subject}] - {get.id_project} Task Feedback"
         body = f"""
                 Dear {fullname},
 
-                This is my feedback about my #{get.id} [{get.subject}] task:
+                This is my feedback about #{get.id} [{get.subject}] task from {get.id_project}:
                 {description}
                 
                 Regards,
