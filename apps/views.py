@@ -282,34 +282,73 @@ def confirmation (request, id):
             # START GANTT CHART ROW
             start_row = get.start_row
 
-            
-            # Function untuk mencari rentang waktu dari nomor weeks
-            def get_date_range_for_week(year, week_start, week_end):
+            def get_date_range_for_week(start_year, end_year, week_start, week_end):
                 if week_start is None or week_start < 1:
                     return []
-                if year == 2025:
-                    first_day = datetime(2024, 12, 30)
-                elif year == 2026:
-                    first_day = datetime(2025, 12, 29)
-                else:
+
+                # Set week_end to week_start if it's None
+                if week_end is None:
+                    week_end = week_start
+
+                # Function to get the first day of the year adjusted to the previous Monday
+                def get_first_day_of_year(year):
                     first_day = datetime(year, 1, 1)
-                def calculate_week_dates(week_number):
+                    if first_day.weekday() != 0:  # Adjust to the previous Monday
+                        first_day -= timedelta(days=first_day.weekday())
+                    return first_day
+
+                # Get the first day of the start_year and end_year
+                first_day_start_year = get_first_day_of_year(start_year)
+                first_day_end_year = get_first_day_of_year(end_year)
+
+                # Function to calculate start_date and end_date for a given week_number and first_day
+                def calculate_week_dates(first_day, week_number):
                     offset = (week_number - 1) * 7
                     start_date = first_day + timedelta(days=offset)
-                    end_date = start_date + timedelta(days=4)
+                    end_date = start_date + timedelta(days=4)  # End of the week assuming a week ends on Sunday
                     return start_date, end_date
-                if week_end is None:
-                    start_date, end_date = calculate_week_dates(week_start)
-                    return [(start_date, end_date)] 
-                elif week_start is not None and week_end is not None and week_end >= week_start:
-                    start_date = calculate_week_dates(week_start)[0]
-                    end_date = calculate_week_dates(week_end)[1]
-                    return [(start_date, end_date)]
-                else:
-                    return []
+
+                date_ranges = []
+
+                # Calculate start_date and end_date using start_year and end_year with respective week numbers
+                start_date, _ = calculate_week_dates(first_day_start_year, week_start)
+                _, end_date = calculate_week_dates(first_day_end_year, week_end)
+            
+             
+            
+                # Add the calculated date range to date_ranges
+                date_ranges.append((start_date, end_date))
+
+                return date_ranges
+
+            # Function untuk mencari rentang waktu dari nomor weeks
+            # def get_date_range_for_week(year, week_start, week_end):
+            #     if week_start is None or week_start < 1:
+            #         return []
+            #     if year == 2025:
+            #         first_day = datetime(2024, 12, 30)
+            #     elif year == 2026:
+            #         first_day = datetime(2025, 12, 29)
+            #     else:
+            #         first_day = datetime(year, 1, 1)
+            #     def calculate_week_dates(week_number):
+            #         offset = (week_number - 1) * 7
+            #         start_date = first_day + timedelta(days=offset)
+            #         end_date = start_date + timedelta(days=4)
+            #         return start_date, end_date
+            #     if week_end is None:
+            #         start_date, end_date = calculate_week_dates(week_start)
+            #         return [(start_date, end_date)] 
+            #     elif week_start is not None and week_end is not None and week_end >= week_start:
+            #         start_date = calculate_week_dates(week_start)[0]
+            #         end_date = calculate_week_dates(week_end)[1]
+            #         return [(start_date, end_date)]
+            #     else:
+            #         return []
                 
             def find_col_with_filled_color(ws, row_index):
                 filled_cells = []
+                filled_year = []
                 year = None
                 # START ITERATION FROM THE COLUMN GANTT_START_COLUMN STARTED
                 for col_index in range(get.gannt_start_column, ws.max_column + 1):
@@ -318,18 +357,17 @@ def confirmation (request, id):
                     if isinstance(cell.fill.fgColor.theme, int) or (cell.fill.fgColor.rgb != 'FFFF0000' and  cell.fill.fgColor.rgb !='00000000' and cell.fill.fgColor.rgb !='FFFFFF00'):
                         findweek = ws.cell(get.week_number_row, col_index).value
                         findyear = ws.cell(get.week_number_row - 1, col_index).value
-                        print(findyear)
-                        if findyear:
-                            if '2025' in str(findyear):
-                                year = 2025
-                            elif '2026' in str(findyear):
-                                year = 2026
-                            else:
-                                year = 2024
-                            print(year)
+                        if '25' in str(findyear):
+                            year = 2025
+                        elif '26' in str(findyear):
+                            year = 2026
+                        else:
+                            year = 2024
+                        filled_year.append(year)
                         filled_cells.append(findweek)
-
-                return filled_cells, year if filled_cells else None
+                print(filled_cells)
+                print(filled_year)
+                return filled_cells, filled_year if filled_cells else None
             
             all = {}
             all['col_start'] = []
@@ -353,29 +391,40 @@ def confirmation (request, id):
             
             tasks_data = []
             current_task = None
-           
         # Dictionary to keep track of the current parent task at each column level
             current_tasks = {key: None for key in all.keys()}
 
             for idx, value in enumerate(all['col_start']):
                 if value is not None:
                     # Main Task
-                 
                     p, year = find_col_with_filled_color(ws, idx + start_row)
                     if p is not None and len(p) > 0:
-                        
                         if len(p) > 1:
                             week_start = min(p)
                             week_end = max(p)
+                            if p[0] > p[-1]:
+                                week_end = p[-1]
+                                week_start = p[0]
+                            start_year = min(year)
+                            end_year = max(year)
+                            if year:
+                                get_ranges = get_date_range_for_week(start_year,end_year, week_start, week_end)
+                                for start_date, end_date in get_ranges:
+                                    start_date = start_date.strftime('%Y-%m-%d')
+                                    end_date = end_date.strftime('%Y-%m-%d')
                         else:
+                            print('elses')
+                            print(p)
                             week_start = min(p)
                             week_end = None
+                            start_year = min(year)
+                            end_year = max(year)
+                            if year:
+                                get_ranges = get_date_range_for_week(start_year,end_year, week_start, week_end)
+                                for start_date, end_date in get_ranges:
+                                    start_date = start_date.strftime('%Y-%m-%d')
+                                    end_date = end_date.strftime('%Y-%m-%d')
                         # Get Ranges masih manual pakai tahun 2024
-                        if year:
-                            get_ranges = get_date_range_for_week(year, week_start, week_end)
-                            for start_date, end_date in get_ranges:
-                                start_date = start_date.strftime('%Y-%m-%d')
-                                end_date = end_date.strftime('%Y-%m-%d')
                     else:
                         week_start = None
                         week_end = None
@@ -412,6 +461,10 @@ def confirmation (request, id):
                     # Reset the current task for all subsequent columns
                     for key in list(current_tasks.keys())[1:]:
                         current_tasks[key] = None
+                    print(value)
+                    print('start:', start_date)
+                    print('due:', end_date)
+
 
                 else:
                     # Iterasi kembali pada column yang tersisa untuk mencari subtasks
@@ -424,14 +477,29 @@ def confirmation (request, id):
                                 if len(p) > 1:
                                     week_start = min(p)
                                     week_end = max(p)
+                                    print(p)
+                                    if p[0] > p[-1]:
+                                        week_end = p[-1]
+                                        week_start = p[0]
+                                    start_year = min(year)
+                                    end_year = max(year)
+                                    if year:
+                                        get_ranges = get_date_range_for_week(start_year,end_year, week_start, week_end)
+                                        for start_date, end_date in get_ranges:
+                                            start_date = start_date.strftime('%Y-%m-%d')
+                                            end_date = end_date.strftime('%Y-%m-%d')
                                 else:
+                                    print('elses')
+                                    print(p)
                                     week_start = min(p)
                                     week_end = None
-                                if year:
-                                    get_ranges = get_date_range_for_week(year, week_start, week_end)
-                                    for start_date, end_date in get_ranges:
-                                        start_date = start_date.strftime('%Y-%m-%d')
-                                        end_date = end_date.strftime('%Y-%m-%d')
+                                    start_year = min(year)
+                                    end_year = max(year)
+                                    if year:
+                                        get_ranges = get_date_range_for_week(start_year,end_year, week_start, week_end)
+                                        for start_date, end_date in get_ranges:
+                                            start_date = start_date.strftime('%Y-%m-%d')
+                                            end_date = end_date.strftime('%Y-%m-%d')
                             else:
                                 week_start = None
                                 week_end = None
@@ -461,7 +529,9 @@ def confirmation (request, id):
                                 'subtasks': []
                             }
 
-
+                            print(subtask_value)
+                            print('start:', start_date)
+                            print('due:', end_date)
                             # Memberikan key parent untuk mengetahui parent tasks
                             for parent_key in reversed(list(current_tasks.keys())[:list(current_tasks.keys()).index(key)]):
                                 if current_tasks[parent_key] is not None:
