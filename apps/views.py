@@ -286,65 +286,36 @@ def confirmation (request, id):
                 if week_start is None or week_start < 1:
                     return []
 
-                # Set week_end to week_start if it's None
+                # Set semisal week_end sama dengan week_start
                 if week_end is None:
                     week_end = week_start
 
-                # Function to get the first day of the year adjusted to the previous Monday
+                # Cari pertama di tahun itu
                 def get_first_day_of_year(year):
                     first_day = datetime(year, 1, 1)
-                    if first_day.weekday() != 0:  # Adjust to the previous Monday
+                    if first_day.weekday() != 0:  # Set ke hari senin
                         first_day -= timedelta(days=first_day.weekday())
                     return first_day
 
-                # Get the first day of the start_year and end_year
+                # Cari untuk start_year dan end_year
                 first_day_start_year = get_first_day_of_year(start_year)
                 first_day_end_year = get_first_day_of_year(end_year)
 
-                # Function to calculate start_date and end_date for a given week_number and first_day
+                # Function mencari span start_date end_date senin-jumat
                 def calculate_week_dates(first_day, week_number):
                     offset = (week_number - 1) * 7
                     start_date = first_day + timedelta(days=offset)
-                    end_date = start_date + timedelta(days=4)  # End of the week assuming a week ends on Sunday
+                    end_date = start_date + timedelta(days=4)  # Mencari hari jumat di week tersebut
                     return start_date, end_date
 
                 date_ranges = []
 
-                # Calculate start_date and end_date using start_year and end_year with respective week numbers
+                # Mencari Start dan End Date dari week given
                 start_date, _ = calculate_week_dates(first_day_start_year, week_start)
                 _, end_date = calculate_week_dates(first_day_end_year, week_end)
-            
-             
-            
-                # Add the calculated date range to date_ranges
                 date_ranges.append((start_date, end_date))
 
                 return date_ranges
-
-            # Function untuk mencari rentang waktu dari nomor weeks
-            # def get_date_range_for_week(year, week_start, week_end):
-            #     if week_start is None or week_start < 1:
-            #         return []
-            #     if year == 2025:
-            #         first_day = datetime(2024, 12, 30)
-            #     elif year == 2026:
-            #         first_day = datetime(2025, 12, 29)
-            #     else:
-            #         first_day = datetime(year, 1, 1)
-            #     def calculate_week_dates(week_number):
-            #         offset = (week_number - 1) * 7
-            #         start_date = first_day + timedelta(days=offset)
-            #         end_date = start_date + timedelta(days=4)
-            #         return start_date, end_date
-            #     if week_end is None:
-            #         start_date, end_date = calculate_week_dates(week_start)
-            #         return [(start_date, end_date)] 
-            #     elif week_start is not None and week_end is not None and week_end >= week_start:
-            #         start_date = calculate_week_dates(week_start)[0]
-            #         end_date = calculate_week_dates(week_end)[1]
-            #         return [(start_date, end_date)]
-            #     else:
-            #         return []
                 
             def find_col_with_filled_color(ws, row_index):
                 filled_cells = []
@@ -529,9 +500,9 @@ def confirmation (request, id):
                                 'subtasks': []
                             }
 
-                            print(subtask_value)
-                            print('start:', start_date)
-                            print('due:', end_date)
+                            # print(subtask_value)
+                            # print('start:', start_date)
+                            # print('due:', end_date)
                             # Memberikan key parent untuk mengetahui parent tasks
                             for parent_key in reversed(list(current_tasks.keys())[:list(current_tasks.keys()).index(key)]):
                                 if current_tasks[parent_key] is not None:
