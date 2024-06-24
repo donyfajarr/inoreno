@@ -147,7 +147,17 @@
                             <tr>
                                 <td class="fw-semibold"><a href="{% url 'listissue' item.id %}">{{item.subject}}</a></td>
                                 <td class="fw-light">{{item.desc}}</td>
-                                <td class="fw-semibold">{{item.status}}</td>
+                                <td>
+                                  {% if item.status.jenis == 'Open' %}
+                                    <span class="badge bg-label-primary fw-semibold">{{ item.status }}</span>
+                                  {% elif item.status.jenis == 'Under Review' %}
+                                    <span class="badge bg-label-warning fw-semibold">{{ item.status }}</span>
+                                  {% elif item.status.jenis == 'Closed' %}
+                                    <span class="badge bg-label-info fw-semibold">{{ item.status }}</span>
+                                  {% else %}
+                                    <span class="badge bg-label-secondary fw-semibold">{{ item.status }}</span> <!-- Default case, if needed -->
+                                  {% endif %}
+
                                 <td>
                                   <a href="{% url 'updateproject' item.id %}"><button class="btn btn-sm btn-warning">Update</button></a>
                                   <a href="{% url 'listissue' item.id %}"><button class="btn btn-sm btn-secondary">Details</button></a>

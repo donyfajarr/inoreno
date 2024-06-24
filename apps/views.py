@@ -175,7 +175,8 @@ def addissue(request, id):
         status = request.POST['status']
         priority = request.POST['priority']
         start_date = request.POST['start_date'] 
-        due_date = request.POST['due_date'] 
+        due_date = request.POST['due_date']
+        parent = request.POST['parent']
         assignee = request.user
         pic = request.POST['pic']
         getstatus = models.status.objects.get(id=status)
@@ -189,9 +190,12 @@ def addissue(request, id):
             start_date = start_date if start_date else None,
             due_date = due_date if due_date else None,
             assignee = assignee,
+            parent = parent
         )
         createpic = models.pic.objects.create(id_task = createissue, pic=pic)
         return redirect ('listproject')
+    
+
 @login
 def listproject(request):
     listproject = models.project.objects.filter(assignee = request.user)
@@ -612,15 +616,21 @@ def deleteproject(request,id):
 @login
 def updateproject(request, id):
     update = models.project.objects.get(id=id)
+    getall = models.status.objects.exclude(id=2)
+    print(getall)
     if request.method == "GET":
         return render(request, 'updateproject.html',{
             'update' : update,
+            'getall' : getall
         })
     else:
         subject = request.POST.get('subject', '')  # Safely retrieve 'subject' from POST data
         description = request.POST.get('description', '')  # Safely retrieve 'description' from POST data
         link = request.POST.get('link', '')
+        status = request.POST['status']
+        getstatus = models.status.objects.get(id=status)
         # Update the project object with the retrieved values
+        update.status = getstatus
         update.subject = subject
         update.desc = description
         update.link = link
@@ -645,8 +655,11 @@ def listdetails(request, id):
         getproject = get.id_project
         getpic = models.pic.objects.filter(id_task = id)
         if get.parent:
-            parent = ast.literal_eval(get.parent)
-            parent = [s for s in parent if 'phase' not in s.lower()]
+            if "[" in get.parent:
+                parent = ast.literal_eval(get.parent)
+                parent = [s for s in parent if 'phase' not in s.lower()]
+            else:
+                parent = [get.parent]
         else:
             parent = None
         listpic = []
@@ -709,6 +722,7 @@ def newissue(request):
     return render(request, 'newissue.html',{
         'allissue' : allissue
     })
+
 @login
 def updateissue(request,id):
     get = models.task.objects.get(id=id)
@@ -758,6 +772,17 @@ def updateissue(request,id):
             registerpic.save()
         get.save()
         return redirect('listdetails', id=id)
+
+@login
+def closeissue(request, id):
+    get = models.task.objects.get(id=id)
+    if get.status.id == 3:
+        getstatus = models.status.objects.get(id=1) #Get open status
+    else:
+        getstatus = models.status.objects.get(id=3) #Get close status
+    get.status = getstatus
+    get.save()
+    return redirect('listdetails', id=get.id)
 @login
 def deleteissue(request,id):
     get = models.task.objects.get(id=id)

@@ -160,14 +160,14 @@
                         <div class="row mb-3">
                             <label class="col-sm-2 col-form-label" for="defaultSelect">Status</label>
                             <div class="col-sm-10">
-                              <select name="status" value="{{update.status}}" id="defaultSelect" class="form-select">
-                                {% if update.status %}
-                                <option selected value="Open">Open</option>
-                                <option value="Closed">Closed</option>
+                              <select name="status" value="{{update.status.id}}" id="defaultSelect" class="form-select">
+                                {% for i in getall %}
+                                {% if i == update.status %}
+                                <option selected value="{{i.id}}">{{i.jenis}}</option>
                                 {% else %}
-                                <option value="Open">Open</option>
-                                <option selected value="Closed">Closed</option>
+                                <option value="{{i.id}}">{{i.jenis}}</option>
                                 {% endif %}
+                                {% endfor %}
                               </select>
                             </div>
                         </div>
