@@ -120,6 +120,7 @@ def get_project_data(request):
         
         # Mengembalikan project terpilih
         selected_project = request.GET.get('project_id')
+        print(selected_project)
         tasks = models.task.objects.filter(id_project=selected_project)
     
         # Mencari data updatean
@@ -161,10 +162,12 @@ def addissue(request, id):
         getallproject = models.project.objects.filter(assignee=request.user)
         allstatus = models.status.objects.all()
         allpriority = models.priority.objects.all()
+        id = int(id)
         return render(request, 'addissue.html', {
             'getallproject' : getallproject,
             'allstatus' : allstatus,
-            'allpriority' : allpriority
+            'allpriority' : allpriority,
+            'id' : id,
         })
     else:
         id = request.POST['id']
@@ -759,8 +762,8 @@ def updateissue(request,id):
 def deleteissue(request,id):
     get = models.task.objects.get(id=id)
     get.delete()
-    idproject = request.session.get('idproject')
-    return redirect('listissue', id=idproject)
+    
+    return redirect('listissue', id=get.id_project.id)
 
 def user_login(request):
     if request.method == "GET":

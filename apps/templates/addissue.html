@@ -144,7 +144,11 @@
                               <div class="col-sm-10">
                                 <select name="id" class="form-select" id="exampleFormControlSelect1" aria-label="Default select example">
                                     {% for i in getallproject %}
+                                    {% if i.id == id %}
+                                    <option selected value="{{i.id}}">{{i.subject}}</option>
+                                    {% else %}
                                     <option value="{{i.id}}">{{i.subject}}</option>
+                                    {% endif %}
                                     {% endfor %}
                                   </select>
                               </div>
