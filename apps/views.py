@@ -335,7 +335,7 @@ def confirmation (request, id):
                     if isinstance(cell.fill.fgColor.theme, int) or (cell.fill.fgColor.rgb != 'FFFF0000' and  cell.fill.fgColor.rgb !='00000000' and cell.fill.fgColor.rgb !='FFFFFF00'):
                         findweek = ws.cell(get.week_number_row, col_index).value
                         findyear = ws.cell(get.week_number_row - 1, col_index).value
-                        print(str(findyear))
+                        # print(str(findyear))
                         if '25' in str(findyear):
                             year = 2025
                         elif '26' in str(findyear):
@@ -344,8 +344,8 @@ def confirmation (request, id):
                             year = 2024
                         filled_year.append(year)
                         filled_cells.append(findweek)
-                print(filled_cells)
-                print(filled_year)
+                # print(filled_cells)
+                # print(filled_year)
                 return filled_cells, filled_year if filled_cells else None
             
             all = {}
@@ -855,7 +855,12 @@ def send_email(request):
 
         def find_pic(task):
             return list(models.pic.objects.filter(id_task=task))
-
+        
+        def format_strings(strings):
+            string_list = ast.literal_eval(strings)
+            cleaned_strings = [s.strip() for s in string_list]
+            return '/'.join(cleaned_strings) 
+        
         def create_email_body(task, status, recipient_email):
             general_name = "Team Member"
             fullname = task.assignee.first_name + " " + task.assignee.last_name
@@ -866,6 +871,8 @@ def send_email(request):
             due_date = task.due_date
             task_id = task.id
             task_parent = task.parent
+            if task_parent:
+                task_parent = format_strings(task_parent)
             task_link = task.id_project.link
             encoded_email = urllib.parse.quote(recipient_email)
             if status == 'start':

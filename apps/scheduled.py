@@ -2,6 +2,7 @@ import requests
 from datetime import date, datetime
 from . import models
 import urllib.parse
+import ast
 
 def send_email():
     today = date.today()
@@ -27,6 +28,11 @@ def send_email():
     def find_pic(task):
         return list(models.pic.objects.filter(id_task=task))
 
+    def format_strings(strings):
+        string_list = ast.literal_eval(strings)
+        cleaned_strings = [s.strip() for s in string_list]
+        return '/'.join(cleaned_strings)
+
     def create_email_body(task, status, recipient_email):
         general_name = "Team Member"
         fullname = task.assignee.first_name + " " + task.assignee.last_name
@@ -37,6 +43,8 @@ def send_email():
         due_date = task.due_date
         task_id = task.id
         task_parent = task.parent
+        if task_parent:
+                task_parent = format_strings(task_parent)
         task_link = task.id_project.link
         encoded_email = urllib.parse.quote(recipient_email)
         if status == 'start':
