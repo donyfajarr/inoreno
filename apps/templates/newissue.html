@@ -178,6 +178,7 @@
                             <tr>
                               <th>Issues</th>
                               <th>Status</th>
+                              <th>Project</th>
                               <th>Start Date</th>
                               <th>Due Date</th>
                               <th>PIC</th>
@@ -199,6 +200,7 @@
                                 <span class="badge bg-label-secondary">{{ item.status }}</span> <!-- Default case, if needed -->
                               {% endif %}
                               </td>
+                              <td>{{item.id_project}}</td>
                               <td>{{item.start_date}}</td>
                               <td>{{item.due_date}}</td>
                               <td>{{item.assignee}}</td>
@@ -269,12 +271,12 @@
             
                     // Toggle filtering when "Due Today" button is clicked
                     $("#dueTodayButton").click(function() {
-                        toggleFilteringByDate(3); // Index of the due date column
+                        toggleFilteringByDate(4); // Index of the due date column
                     });
             
                     // Toggle filtering when "Start Today" button is clicked
                     $("#startTodayButton").click(function() {
-                        toggleFilteringByDate(2); // Index of the start date column
+                        toggleFilteringByDate(3); // Index of the start date column
                     });
 
                     $("#ongoingButton").click(function(){
@@ -303,8 +305,8 @@
                 function filterOngoingTasks(){
                   var today = new Date();
                   $(".table tbody tr").each(function() {
-                      var startDateString = $(this).find("td:eq(2)").text().trim();
-                      var dueDateString = $(this).find("td:eq(3)").text().trim();
+                      var startDateString = $(this).find("td:eq(3)").text().trim();
+                      var dueDateString = $(this).find("td:eq(4)").text().trim();
                       var startDate = new Date(startDateString);
                       var dueDate = new Date(dueDateString);
                       if (startDate <= today && dueDate >= today) {

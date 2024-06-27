@@ -239,6 +239,33 @@
                         }
                     </style>
                     </div>
+
+                    <div class="card mt-4">
+                      <h5 class="card-header">Task Feedback</h5>
+                      <div class="table-responsive text-nowrap">
+                        <table class="table">
+                          <thead>
+                            <tr class="text-nowrap">
+                              <th>#</th>
+                              <th>Sender</th>
+                              <th>Feedback</th>
+                              <th>Timestamp</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for item in findfeedback %}
+                            <tr>
+                              <td>{{item.id}}</td>
+                              <td>{{item.email}}</td>
+                              <td>{{item.desc}}</td>
+                              <td>{{item.timestamp}}</td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
                     {% endif %}
                         
                   </div>

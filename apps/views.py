@@ -335,6 +335,7 @@ def confirmation (request, id):
                     if isinstance(cell.fill.fgColor.theme, int) or (cell.fill.fgColor.rgb != 'FFFF0000' and  cell.fill.fgColor.rgb !='00000000' and cell.fill.fgColor.rgb !='FFFFFF00'):
                         findweek = ws.cell(get.week_number_row, col_index).value
                         findyear = ws.cell(get.week_number_row - 1, col_index).value
+                        print(str(findyear))
                         if '25' in str(findyear):
                             year = 2025
                         elif '26' in str(findyear):
@@ -380,11 +381,13 @@ def confirmation (request, id):
                         if len(p) > 1:
                             week_start = min(p)
                             week_end = max(p)
+                            start_year = max(year)
+                            end_year = max(year)
                             if p[0] > p[-1]:
                                 week_end = p[-1]
                                 week_start = p[0]
-                            start_year = min(year)
-                            end_year = max(year)
+                                start_year = min(year)
+                                end_year = max(year)
                             if year:
                                 get_ranges = get_date_range_for_week(start_year,end_year, week_start, week_end)
                                 for start_date, end_date in get_ranges:
@@ -455,12 +458,14 @@ def confirmation (request, id):
                                 if len(p) > 1:
                                     week_start = min(p)
                                     week_end = max(p)
+                                    start_year = max(year)
+                                    end_year = max(year)
                                     print(p)
                                     if p[0] > p[-1]:
                                         week_end = p[-1]
                                         week_start = p[0]
-                                    start_year = min(year)
-                                    end_year = max(year)
+                                        start_year = min(year)
+                                        end_year = max(year)
                                     if year:
                                         get_ranges = get_date_range_for_week(start_year,end_year, week_start, week_end)
                                         for start_date, end_date in get_ranges:
@@ -669,13 +674,15 @@ def listdetails(request, id):
         email = request.GET.get('email', '')
         if email:
             email = unquote(email)
+        findfeedback = models.feedback.objects.filter(id_task = get)
         return render(request, 'listdetails.html', {
         "get" : get,
         "getproject" : getproject,
         'getpic' : listpic,
         'email' : email,
         'parent' : parent,
-        'id' : id
+        'id' : id,
+        'findfeedback' : findfeedback
     })
     else:
         sender = request.POST['sender']
@@ -704,10 +711,18 @@ def listdetails(request, id):
         }
         print(payload)
         print(datetime.now())
+        
         response = requests.post(email_api, json=payload)
         if response.status_code == 200:
             print("Email sent successfully.")
             get.save()
+            createget = models.feedback.objects.create(
+                id_task = get,
+                timestamp = datetime.now(),
+                desc = description,
+                email = sender
+            )
+            createget.save()
         else:
             print(f"Failed to send email. Status code: {response.status_code}")
             print(response.text)

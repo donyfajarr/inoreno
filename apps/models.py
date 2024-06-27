@@ -52,8 +52,9 @@ class pic(models.Model):
 
 class feedback(models.Model):
     id = models.AutoField(primary_key=True)
+    email = models.EmailField(null=True, blank=True)
     id_task = models.ForeignKey(task, on_delete=models.CASCADE)
-    desc = models.TextField
+    desc = models.TextField(null=True, blank=True)
     timestamp = models.DateTimeField()
 
     def __str__(self):
