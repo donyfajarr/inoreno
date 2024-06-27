@@ -43,7 +43,7 @@ def send_email():
         due_date = task.due_date
         task_id = task.id
         task_parent = task.parent
-        if task_parent:
+        if task_parent is not None and '[' in task_parent:
                 task_parent = format_strings(task_parent)
         task_link = task.id_project.link
         encoded_email = urllib.parse.quote(recipient_email)
