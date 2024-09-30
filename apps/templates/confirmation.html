@@ -184,26 +184,26 @@
                             {% for item in tasks_data %}
                             <div class="mb-3">
                                 <label class="form-label" for="basic-default-fullname">Issue Name</label>
-                                <input type="text" class="form-control" name="name_{{item.name}}" value="{{item.name}}" id="basic-default-fullname" />
+                                <input type="text" class="form-control" name="name_{{item.id}}" value="{{item.name}}" id="basic-default-fullname" />
                             </div>
                         
                             
                             <div class="mb-3">
                               <label for="html5-date-input" class="form-label">Start Date</label>
                               
-                              <input class="form-control" type="date" name="start_date_{{item.name}}" value="{{item.start_date}}" id="html5-date-input" />
+                              <input class="form-control" type="date" name="start_date_{{item.id}}" value="{{item.start_date}}" id="html5-date-input" />
                           
                           </div>
                           <div class="mb-3">
                               <label for="html5-date-input" class="form-label">Due Date</label>
                           
-                              <input class="form-control" type="date" name="due_date_{{item.name}}" value="{{item.due_date}}" id="html5-date-input" />
+                              <input class="form-control" type="date" name="due_date_{{item.id}}" value="{{item.due_date}}" id="html5-date-input" />
                               
                           </div>  
                           <div class="mb-3">
                             <label class="form-label" for="basic-default-name">Priority</label>
                               
-                                <select name="priority_{{item.name}}" class="form-select" id="exampleFormControlSelect1" aria-label="Default select example">
+                                <select name="priority_{{item.id}}" class="form-select" id="exampleFormControlSelect1" aria-label="Default select example">
                                   {% for i in allpriority %}
                                   {% if i.jenis == item.priority %}
                                   <option selected value="{{i.id}}">{{i.jenis}}</option>
@@ -218,10 +218,10 @@
                           <label class="col-sm-2 col-form-label" for="basic-default-name">Responsible</label>
                            
                           <select
-                              name="responsible_{{ item.name }}[]"
+                              name="responsible_{{ item.id }}[]"
                               multiple
                               class="form-select"
-                              id="responsible_{{ item.name }}"
+                              id="responsible_{{ item.id }}"
                               aria-label="Multiple select example"
                             >
                               {% for email in item.person %}
@@ -236,7 +236,7 @@
                             <div class="mb-3">
                               <label class="form-label" for="basic-default-name">Parent Task</label>
                               
-                                <input name="parenttask_{{item.name}}"
+                                <input name="parenttask_{{item.id}}"
                                 value = "{{item.Parent}}"
                                 class="form-control"
                                 type="text"

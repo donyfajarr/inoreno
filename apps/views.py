@@ -372,7 +372,7 @@ def confirmation (request, id):
             current_task = None
         # Dictionary to keep track of the current parent task at each column level
             current_tasks = {key: None for key in all.keys()}
-
+            idq = 0
             for idx, value in enumerate(all['col_start']):
                 if value is not None:
                     # Main Task
@@ -426,6 +426,7 @@ def confirmation (request, id):
                         findpriority = findpriority.capitalize()
 
                     current_task = {
+                        'id' : idq,
                         'name': value,
                         'start_date': start_date,
                         'due_date': end_date,
@@ -434,6 +435,7 @@ def confirmation (request, id):
                         'priority' : findpriority,
                         'subtasks': []
                     }
+                    idq+=1
                     tasks_data.append(current_task)
 
                     # Set the current task for col_start level
@@ -472,8 +474,8 @@ def confirmation (request, id):
                                             start_date = start_date.strftime('%Y-%m-%d')
                                             end_date = end_date.strftime('%Y-%m-%d')
                                 else:
-                                    print('elses')
-                                    print(p)
+                                    # print('elses')
+                                    # print(p)
                                     week_start = min(p)
                                     week_end = None
                                     start_year = min(year)
@@ -503,6 +505,7 @@ def confirmation (request, id):
                                 findpriority = findpriority.capitalize()
 
                             subtask = {
+                                'id' : idq,
                                 'name': subtask_value,
                                 'pic': findpic,
                                 'start_date': start_date,
@@ -511,6 +514,7 @@ def confirmation (request, id):
                                 'priority' : findpriority,
                                 'subtasks': []
                             }
+                            idq+=1
 
                             # print(subtask_value)
                             # print('start:', start_date)
@@ -551,13 +555,14 @@ def confirmation (request, id):
             
             
             process_tasks(tasks_data)
-            print(forprint)
-            
+            # print(forprint)
+            # print(id)
             
             # SESSION THE DATA TO BE PASSED INTO AFTER POST LOGIC
 
             request.session['forprint'] = forprint
             request.session['name'] = id
+
             
             return render (request, 'confirmation.html', {
                 'tasks_data' : forprint,
@@ -571,12 +576,13 @@ def confirmation (request, id):
             def create_issue(item):
                 # THE ['name'] IS USE TO HANDLE A MULTIPLE FORM FOR A MULTIPLE TASK THAT WILL BE PROCCESSED
                 
-                form_name = f"name_{item['name']}"
-                form_start_date = f"start_date_{item['name']}"
-                form_due_date = f"due_date_{item['name']}"
-                form_responsible = f"responsible_{item['name']}[]"
-                form_priority = f"priority_{item['name']}"
-                form_parent = f"parenttask_{item['name']}"
+                form_name = f"name_{item['id']}"
+                # print(form_name)
+                form_start_date = f"start_date_{item['id']}"
+                form_due_date = f"due_date_{item['id']}"
+                form_responsible = f"responsible_{item['id']}[]"
+                form_priority = f"priority_{item['id']}"
+                form_parent = f"parenttask_{item['id']}"
                 subject = request.POST.get(form_name)
                 start_date = request.POST.get(form_start_date)
                 due_date = request.POST.get(form_due_date)
@@ -611,6 +617,7 @@ def confirmation (request, id):
             
             return redirect('listproject')
     return render(request, 'confirmation.html')
+
 
 @login
 def deleteproject(request,id):
