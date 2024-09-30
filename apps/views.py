@@ -469,6 +469,7 @@ def confirmation (request, id):
                                         start_year = min(year)
                                         end_year = max(year)
                                     if year:
+                                        
                                         get_ranges = get_date_range_for_week(start_year,end_year, week_start, week_end)
                                         for start_date, end_date in get_ranges:
                                             start_date = start_date.strftime('%Y-%m-%d')
